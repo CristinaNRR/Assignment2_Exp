@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   tf
+  actionlib
   actionlib_msgs
 )
 
@@ -145,6 +146,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/example.cpp)
 # add_executable(${PROJECT_NAME}_node_t src/example_transport.cpp)
+ add_executable(move_client src/move_client.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -154,12 +156,17 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}
+ add_dependencies(move_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 ## Specify libraries to link a library or executable target against
 #  target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
 # )
+ target_link_libraries(move_client
+  ${catkin_LIBRARIES}
+ )
 
 # target_link_libraries(${PROJECT_NAME}_node_t
 #   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}

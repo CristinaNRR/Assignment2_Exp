@@ -37,7 +37,7 @@
     <!-- body -->
     <collision name="collision_ball">
       <geometry>
-       <!-- <sphere radius="0.5"/>-->
+      <!-- <sphere radius="0.5"/>-->
       </geometry>
     </collision>
     <visual>
