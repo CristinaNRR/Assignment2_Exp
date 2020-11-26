@@ -23,9 +23,9 @@ int main(int argc, char** argv){
   //double pos_x[4] = {3.0, 3.0, 0.0, 0.0};
   //double pos_y[4] = {0.0, 3.0, 3.0, 0.0};
   //double pos_z[4] = {0.5, 0.5, 0.5, 0.5};
-  double pos_x[4] = {2.0, 2.0, 0.0, 0.0};
-  double pos_y[4] = {0.0, 2.0, 2.0, 0.0};
-  double pos_z[4] = {0.25, 0.25, 0.25, 0.25};
+  double pos_x = {2.0000};
+  double pos_y = {0.000};
+  double pos_z = {0.25};
 
   exp_assignment2::PlanningGoal goal;
   
@@ -37,9 +37,9 @@ int main(int argc, char** argv){
   goal.target_pose.header.frame_id = "base_link";
   goal.target_pose.header.stamp = ros::Time::now();
 
-  goal.target_pose.pose.position.x = pos_x[i];
-  goal.target_pose.pose.position.y = pos_y[i];
-  goal.target_pose.pose.position.z = pos_z[i];
+  goal.target_pose.pose.position.x = pos_x;
+  goal.target_pose.pose.position.y = pos_y;
+  goal.target_pose.pose.position.z = pos_z;
   goal.target_pose.pose.orientation.w = 0.0;
 
   ROS_INFO("Sending goal");

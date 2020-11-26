@@ -57,11 +57,11 @@ find_package (OpenCV REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+ add_message_files(
+   FILES
+  Num.msg
 #   Message2.msg
-# )
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -82,6 +82,7 @@ find_package (OpenCV REQUIRED)
    DEPENDENCIES
    geometry_msgs
    actionlib_msgs
+   std_msgs
  )
 
 ################################################
@@ -117,6 +118,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES bridge_example
 #  CATKIN_DEPENDS cv_bridge image_transport roscpp sensor_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
   DEPENDS OpenCV
 )
 
@@ -147,6 +149,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/example.cpp)
 # add_executable(${PROJECT_NAME}_node_t src/example_transport.cpp)
  add_executable(move_client src/move_client.cpp)
+ add_executable(send_pose src/send_pose.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,13 +161,17 @@ include_directories(
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}
  add_dependencies(move_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
+ add_dependencies(send_pose ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 #  target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
 # )
  target_link_libraries(move_client
+  ${catkin_LIBRARIES}
+ )
+
+target_link_libraries(send_pose
   ${catkin_LIBRARIES}
  )
 
@@ -187,6 +194,10 @@ include_directories(
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
+ install(PROGRAMS
+   scripts/go_to_point_robot.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
