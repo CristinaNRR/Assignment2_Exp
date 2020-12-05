@@ -5,12 +5,14 @@
 #include <std_msgs/Float64.h>
 #include <unistd.h>
 
+
 int main(int argc, char** argv){
   ros::init(argc, argv, "simple_navigation_goals");
   ros::NodeHandle nh;
 
 //dichiaro actionlib il nome del nodo e il tipo di messaggio
   actionlib::SimpleActionClient<exp_assignment2::PlanningAction> ac("/reaching_goal", true);
+
   
 //publish an angle to the controller to rotate the camera
   //ros::Publisher pub = nh.advertise<std_msgs::Float64>("m2wr/joint1_position_controller/command", 10);
@@ -20,9 +22,9 @@ int main(int argc, char** argv){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
   
-  double pos_x[4] = {3.0, 3.0, 0.0, 0.0};
-  double pos_y[4] = {0.0, 3.0, 3.0, 0.0};
-  //double pos_z[4] = {0.5, 0.5, 0.5, 0.5};
+  double pos_x[16] = {7.0, 8.0, 7.0, 0.0,0.0, 5.0, 4.0, 0.0,4.0, 5.0, 0.0, 0.0,0.0, 4.0, 4.0, 0.0};
+  double pos_y[16] = {0.0, 0.0, 0.0, 0.0,0.0, 7.0, 4.0, 0.0,0.0, 4.0, 4.0, 0.0,0.0, 7.0, 4.0, 0.0};
+  double pos_z[16] = {0.25, 0.25, 0.25, 0.25,0.25, 0.25, 0.25, 0.25,0.25, 0.25, 0.25, 0.25,0.25, 0.25, 0.25, 0.25};
   //double pos_x = {0.0000};
  // double pos_y = {1.000};
   //double pos_z = {0.25};
@@ -30,7 +32,7 @@ int main(int argc, char** argv){
   exp_assignment2::PlanningGoal goal;
   
   
-  for(int i=0;i<4;i++){
+  for(int i=0;i<16;i++){
   std_msgs::Float64 angle;
   angle.data = 0.0;
   //we'll send a goal to move the robot
@@ -39,7 +41,7 @@ int main(int argc, char** argv){
 
   goal.target_pose.pose.position.x = pos_x[i];
   goal.target_pose.pose.position.y = pos_y[i];
-  //goal.target_pose.pose.position.z = pos_z;
+  goal.target_pose.pose.position.z = pos_z[i];
   goal.target_pose.pose.orientation.w = 0.0;
 
   ROS_INFO("Sending goal");
@@ -49,6 +51,7 @@ int main(int argc, char** argv){
 
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("Hooray, target reached!");
+
   else
     ROS_INFO("The base failed to reach the target for some reason");
   
