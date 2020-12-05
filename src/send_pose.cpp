@@ -7,10 +7,13 @@
 
 #include <unistd.h>
 
+  ros::Publisher pub; //Publisher for sending velocity commands
+
 void Callback (const exp_assignment2::Num::ConstPtr& msg) {
   ROS_INFO("received smth");
 
-  actionlib::SimpleActionClient<exp_assignment2::PlanningAction> ac("/reaching_goal", true);
+  actionlib::SimpleActionClient<exp_assignment2::PlanningAction> ac("/reaching_goal2", true);
+
 //dichiaro actionlib il nome del nodo e il tipo di messaggio
   while(!ac.waitForServer(ros::Duration(5.0))){
     ROS_INFO("Waiting for the move_base action server to come up");
@@ -27,8 +30,9 @@ void Callback (const exp_assignment2::Num::ConstPtr& msg) {
   ROS_INFO("%f", pos_y);
 
   exp_assignment2::PlanningGoal goal;
+
   
-  goal.target_pose.header.frame_id = "base_link";
+  goal.target_pose.header.frame_id = "link_chassis";
   goal.target_pose.header.stamp = ros::Time::now();
 
   goal.target_pose.pose.position.x = pos_x;
@@ -45,11 +49,30 @@ void Callback (const exp_assignment2::Num::ConstPtr& msg) {
   	ROS_INFO("Hooray, target reached!");
   else
   	ROS_INFO("The base failed to reach the target for some reason");
+
+  std_msgs::Float64 angle;
+  angle.data = 0.0;
+  ROS_INFO("Rotating camera");
+  while(angle.data<1){
+	angle.data=angle.data +0.1;
+        pub.publish(angle);
+        sleep(0.5);
+  }
+  sleep(5);
+  while(angle.data>=0){
+	angle.data=angle.data - 0.1;
+        pub.publish(angle);
+        sleep(0.5);
+  }
+
+ 
   
 }
 int main(int argc, char** argv){
   ros::init(argc, argv, "simple_navigation_goals");
   ros::NodeHandle nh;
+  pub = nh.advertise<std_msgs::Float64>("/robot/joint1_position_controller/command", 10);
+
 
   ros::Subscriber sub = nh.subscribe("targetPosition",4,Callback);//name of the topic, size of       buffer, callback
   ros::spin();

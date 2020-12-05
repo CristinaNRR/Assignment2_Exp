@@ -20,12 +20,12 @@ int main(int argc, char** argv){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
   
-  //double pos_x[4] = {3.0, 3.0, 0.0, 0.0};
-  //double pos_y[4] = {0.0, 3.0, 3.0, 0.0};
+  double pos_x[4] = {3.0, 3.0, 0.0, 0.0};
+  double pos_y[4] = {0.0, 3.0, 3.0, 0.0};
   //double pos_z[4] = {0.5, 0.5, 0.5, 0.5};
-  double pos_x = {2.0000};
-  double pos_y = {0.000};
-  double pos_z = {0.25};
+  //double pos_x = {0.0000};
+ // double pos_y = {1.000};
+  //double pos_z = {0.25};
 
   exp_assignment2::PlanningGoal goal;
   
@@ -34,12 +34,12 @@ int main(int argc, char** argv){
   std_msgs::Float64 angle;
   angle.data = 0.0;
   //we'll send a goal to move the robot
-  goal.target_pose.header.frame_id = "base_link";
+  goal.target_pose.header.frame_id = "link_chassis";
   goal.target_pose.header.stamp = ros::Time::now();
 
-  goal.target_pose.pose.position.x = pos_x;
-  goal.target_pose.pose.position.y = pos_y;
-  goal.target_pose.pose.position.z = pos_z;
+  goal.target_pose.pose.position.x = pos_x[i];
+  goal.target_pose.pose.position.y = pos_y[i];
+  //goal.target_pose.pose.position.z = pos_z;
   goal.target_pose.pose.orientation.w = 0.0;
 
   ROS_INFO("Sending goal");

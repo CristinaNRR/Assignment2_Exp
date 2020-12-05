@@ -57,7 +57,7 @@ class Normal(smach.State):
         	#send the robot 3 random positions
 		randomlist = []
 		for i in range(0,2):
-			n = random.randint(1,10)
+			n = random.randint(1,5)
 			randomlist.append(n)
 		rospy.loginfo('sending the random position: %s', randomlist)		
 		pub.publish(randomlist)

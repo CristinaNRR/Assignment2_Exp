@@ -198,6 +198,10 @@ target_link_libraries(send_pose
    scripts/go_to_point_robot.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
+ install(PROGRAMS
+   scripts/go_to_point_action.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

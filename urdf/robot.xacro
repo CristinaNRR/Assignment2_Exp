@@ -146,9 +146,11 @@
       </geometry>
       <material name="orange" />
   	</visual>
-  </link>
+</link>
 
- <joint name="neck_joint" type="fixed">
+ <joint name="neck_joint" type="revolute">
+	<axis xyz="0 0 1"/>
+  	<limit effort="1000.0" lower="0" upper="6.28" velocity="0.2"/>
   	<origin rpy="0 0 0" xyz="0.17 0 0.035"/>
   	<parent link="link_chassis"/>
   	<child link="neck_link"/>
@@ -171,13 +173,10 @@
       <geometry>
         <box size="0.15 0.15 0.15"/>
       </geometry>
-      <material name="green"/>
   	</visual>
   </link>
 
-  <joint name="head_joint" type="revolute">
-  	<axis xyz="0 0 1"/>
-  	<limit effort="1000.0" lower="-6.28" upper="6.28" velocity="0.2"/>
+  <joint name="head_joint" type="fixed">
   	<origin rpy="0 0 0" xyz="0 0 0.05"/>
   	<parent link="neck_link"/>
   	<child link="head_link"/>
@@ -187,7 +186,7 @@
   
   <link name="camera_link">
 	    <collision>
-	      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+	      <origin xyz="0 0 0.005" rpy="0 0 0"/>
 	      <geometry>
 		<box size="0.05 0.05 0.01"/>
 	      </geometry>
@@ -216,6 +215,17 @@
 	    <parent link="head_link"/>
 	    <child link="camera_link"/> 
 	 </joint>
+
+<transmission name="neck_joint_trans">
+	<type>transmission_interface/SimpleTransmission</type>
+	<joint name="neck_joint">
+		<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+	</joint>
+	<actuator name="motor1">
+		<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		<mechanicalInterface>1</mechanicalInterface>
+	</actuator>
+</transmission>
 
 
 
