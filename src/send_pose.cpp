@@ -48,18 +48,21 @@ void Callback (const exp_assignment2::Num::ConstPtr& msg) {
 
   ac.waitForResult();
 
-  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+
   	ROS_INFO("Hooray, target reached!");
+  	std_msgs::Int8 msg2;
+  	msg2.data = 1;
+
+  	pub2.publish(msg2);
+}
 
 
   
   else
   	ROS_INFO("The base failed to reach the target for some reason");
 
-  std_msgs::Int8 msg2;
-  msg2.data = 1;
 
-  pub2.publish(msg2);
 
  // std_msgs::Float64 angle;
  // angle.data = 0.0;

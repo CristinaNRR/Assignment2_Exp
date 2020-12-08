@@ -43,6 +43,7 @@ def user_action(data):
 class Normal(smach.State):
     def __init__(self):
         self.var='FALSE'
+	self.count=0
 	#self.gesture=[0,0]
 	#get params from the parameter server
 	#self.var= rospy.get_param('~person')
@@ -67,8 +68,8 @@ class Normal(smach.State):
 
         rospy.loginfo('Executing state NORMAL ')
 
-
-	count=0
+	#time.sleep(3)
+	#count=0
 	while(self.var=='FALSE'):
         	#send the robot 3 random positions
 		randomlist = []
@@ -79,9 +80,9 @@ class Normal(smach.State):
 		pub.publish(randomlist)
  		time.sleep(3)
 		rospy.loginfo('still in NORMAL ')
-		if(count>=1):
+		if(self.count>=1):
                		rospy.wait_for_message('chatter', Int8)
-		count = count+1
+		self.count = self.count+1
 
 
 	self.var='FALSE'
@@ -160,7 +161,8 @@ class Play(smach.State):
 	
         smach.State.__init__(self, 
                              outcomes=['normal'])
-        self.var2='FALSE'
+        self.var2=0
+	self.count=0
                           
 
     def execute(self,userdata):
@@ -175,14 +177,19 @@ class Play(smach.State):
         # subscribed Topic
         self.subscriber = rospy.Subscriber("camera1/image_raw/compressed",
                                            CompressedImage, self.callback2,  queue_size=1)
-	while(self.var2=='FALSE'):
-		rospy.loginfo('still in PLAY')
+	while(self.var2<200):
+		#rospy.loginfo('still in PLAY')
+		self.count = self.count+1
 
+	self.var2=0
+	self.subscriber.unregister()
+	time.sleep(5)
 	return user_action('NORMAL')
            
     def callback2(self, ros_data):
    
-    	rospy.loginfo('received image ')
+    	#rospy.loginfo('received image ')
+
 	#next time we enter the normal state, the play state must be activated
     	#self.var = 'TRUE' 
 	#self.gesture = data.num
@@ -231,6 +238,7 @@ class Play(smach.State):
                 self.vel_pub.publish(vel)
 
         else:
+	    self.var2 = self.var2+1
             vel = Twist()
             vel.angular.z = 0.5
             self.vel_pub.publish(vel)
