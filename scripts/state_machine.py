@@ -30,11 +30,14 @@ def user_action(data):
     if(data=='PLAY'):
 	return ('play')
 
+    elif(data=='SLEEP'):
+	return ('sleep')
+
     elif(data=='NORMAL'):
 	return ('normal')
 
-    else:
-   	return random.choice(['sleep','normal'])
+   # else:
+   #	return random.choice(['sleep','normal'])
   
 
 
@@ -67,9 +70,9 @@ class Normal(smach.State):
                                            CompressedImage, self.callback,  queue_size=1)
 
         rospy.loginfo('Executing state NORMAL ')
-
-	#time.sleep(3)
+	self.var='FALSE'
 	#count=0
+
 	while(self.var=='FALSE'):
         	#send the robot 3 random positions
 		randomlist = []
@@ -80,10 +83,15 @@ class Normal(smach.State):
 		pub.publish(randomlist)
  		time.sleep(3)
 		rospy.loginfo('still in NORMAL ')
+                #to syncronize with the action client
 		if(self.count>=1):
                		rospy.wait_for_message('chatter', Int8)
-		self.count = self.count+1
 
+		self.count = self.count+1
+		if self.count==4 :
+			self.count=1
+			self.var='FALSE'
+			return user_action('SLEEP')	
 
 	self.var='FALSE'
 	self.subscriber.unregister()
@@ -119,6 +127,8 @@ class Normal(smach.State):
         # only proceed if at least one contour was found
         if len(cnts) > 0:
     		self.var = 'TRUE' 
+	#else :
+		#self.var = 'FALSE'
         
 
     
@@ -142,15 +152,16 @@ class Sleep(smach.State):
     def execute(self,userdata):
         rospy.loginfo('Executing state SLEEP')
         pub = rospy.Publisher('targetPosition', Num,queue_size=10) 
-        while not rospy.is_shutdown():  
+
 		
 
-		rospy.loginfo('sending the home position: %s', self.home)
-		pub.publish(self.home)		
-		#add a sleep to make the robot remain in the sleep state for a certain time
-		time.sleep(5)
+        #rospy.loginfo('sending the home position')
+	pub.publish(self.home)	
+        rospy.wait_for_message('chatter', Int8)	
+	#add a sleep to make the robot remain in the sleep state for a certain time
+	time.sleep(20)
         
-                return user_action('NORMAL')
+        return user_action('NORMAL')
                
             
 
@@ -177,13 +188,14 @@ class Play(smach.State):
         # subscribed Topic
         self.subscriber = rospy.Subscriber("camera1/image_raw/compressed",
                                            CompressedImage, self.callback2,  queue_size=1)
-	while(self.var2<200):
+	while(self.var2<600):
 		#rospy.loginfo('still in PLAY')
 		self.count = self.count+1
 
+	rospy.loginfo('stoptracking')
 	self.var2=0
 	self.subscriber.unregister()
-	time.sleep(5)
+	#time.sleep(5)
 	return user_action('NORMAL')
            
     def callback2(self, ros_data):
@@ -216,6 +228,7 @@ class Play(smach.State):
             # find the largest contour in the mask, then use
             # it to compute the minimum enclosing circle and
             # centroid
+	    self.var2=0
             c = max(cnts, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
@@ -244,7 +257,7 @@ class Play(smach.State):
             self.vel_pub.publish(vel)
 
         #cv2.imshow('window', image_np)
-        cv2.waitKey(2)
+        #cv2.waitKey(2)
 
         # self.subscriber.unregister()
 

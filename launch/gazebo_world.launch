@@ -72,8 +72,8 @@
   	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -model $(arg ns1) -param robot_description -x 0 -y 0 -Y 3.14 -z 0.05"/>
         <node name="state_machine" pkg="exp_assignment2" type="state_machine.py" output="screen"/>
-	<node name="position_server" pkg="exp_assignment2" type="go_to_point_action.py" />
-        <node name="position_client" pkg="exp_assignment2" type="send_pose" />
+	<node name="position_server" pkg="exp_assignment2" type="go_to_point_action.py"  />
+        <node name="position_client" pkg="exp_assignment2" type="send_pose"   />
 
   </group>
   
