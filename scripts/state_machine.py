@@ -4,6 +4,7 @@ import roslib
 import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Int8
+from std_msgs.msg import Float64
 
 import smach
 import smach_ros
@@ -11,6 +12,7 @@ import time
 import random
 from exp_assignment2.msg import Num
 import random
+import datetime
 
 import cv2
 import sys
@@ -153,6 +155,7 @@ class Sleep(smach.State):
         rospy.loginfo('Executing state SLEEP')
         pub = rospy.Publisher('targetPosition', Num,queue_size=10) 
 
+
 		
 
         #rospy.loginfo('sending the home position')
@@ -184,10 +187,14 @@ class Play(smach.State):
                                          CompressedImage, queue_size=1)
         self.vel_pub = rospy.Publisher("cmd_vel",
                                        Twist, queue_size=1)
+        self.publisher = rospy.Publisher("/robot/joint1_position_controller/command", Float64, queue_size=10)
 
         # subscribed Topic
         self.subscriber = rospy.Subscriber("camera1/image_raw/compressed",
                                            CompressedImage, self.callback2,  queue_size=1)
+
+	self.lastTime = datetime.datetime.now().time()
+	print(self.lastTime)
 	while(self.var2<600):
 		#rospy.loginfo('still in PLAY')
 		self.count = self.count+1
@@ -245,6 +252,28 @@ class Play(smach.State):
                 vel.angular.z = -0.002*(center[0]-400)
                 vel.linear.x = -0.01*(radius-100)
                 self.vel_pub.publish(vel)
+	       # print(vel)
+	        currentTime = datetime.datetime.now().time()
+		print(currentTime)
+                delta = datetime.timedelta(seconds = 7)
+	
+		if (vel.angular.z<0.05 and vel.angular.z>-0.05 and vel.linear.x<0.05 and vel.linear.x>-0.05 and currentTime>(datetime.datetime.combine(datetime.date(1,1,1),self.lastTime)+ 			delta).time()):
+
+			  angle = Float64()
+  			  angle.data = 0.0
+  			  rospy.loginfo("Rotating camera")
+  			  while(angle.data<1):
+				angle.data=angle.data +0.1
+       		                self.publisher.publish(angle)
+                                time.sleep(0.5);
+  
+                          time.sleep(5);
+                          while(angle.data>=0):
+	                  	angle.data=angle.data - 0.1
+                      	        self.publisher.publish(angle)
+        			time.sleep(0.5)
+			  self.lastTime = datetime.datetime.now().time()		
+
             else:
                 vel = Twist()
                 vel.linear.x = 0.5

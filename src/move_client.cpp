@@ -22,11 +22,11 @@ int main(int argc, char** argv){
     ROS_INFO("Waiting for the move_base action server to come up");
   }
   
-  double pos_x[22] = {7.0, 8.0, 7.0, 0.0,0.0, 5.0, 4.0, 0.0,4.0, 5.0, 0.0, 0.0,0.0, 4.0, 4.0, 0.0,0.0, 0.0,0.0, 4.0, 4.0, 0.0};
-  double pos_y[22] = {0.0, 0.0, 0.0, 0.0,0.0, 7.0, 4.0, 0.0,0.0, 4.0, 4.0, 0.0,0.0, 7.0, 4.0, 0.0,4.0, 0.0,0.0, 7.0, 4.0, 0.0};
+  double pos_x[22] = {7.0, 8.0, 7.0, 0.0,0.0, 0.0, 4.0, 0.0,4.0, 5.0, 0.0, 0.0,0.0, 4.0, 4.0, 0.0,0.0, 0.0,0.0, 4.0, 4.0, 0.0};
+  double pos_y[22] = {0.0, 0.0, 0.0, 0.0,0.0, 0.0, 4.0, 0.0,0.0, 4.0, 4.0, 0.0,0.0, 7.0, 4.0, 0.0,4.0, 0.0,0.0, 7.0, 4.0, 0.0};
   double pos_z[22] = {0.25, 0.25, 0.25, 0.25,0.25, 0.25, 0.25, 0.25, -0.7, -0.7, 0.25, 0.25,0.25, -0.7, -0.7, -0.7,0.25, 0.25,0.25, -0.7, -0.7, -0.7};
-  //double pos_x = {0.0000};
- // double pos_y = {1.000};
+  //double pos_x = {1.0};
+  //double pos_y = {1.0};
   //double pos_z = {0.25};
 
   exp_assignment2::PlanningGoal goal;
@@ -36,7 +36,7 @@ int main(int argc, char** argv){
   std_msgs::Float64 angle;
   angle.data = 0.0;
   //we'll send a goal to move the robot
-  goal.target_pose.header.frame_id = "link_chassis";
+  goal.target_pose.header.frame_id = "base_link";
   goal.target_pose.header.stamp = ros::Time::now();
 
   goal.target_pose.pose.position.x = pos_x[i];
@@ -63,7 +63,7 @@ int main(int argc, char** argv){
   
   
   //ROS_INFO("Camera rotated");
-    
-  }
+  }  
+  
   return 0;
 }
