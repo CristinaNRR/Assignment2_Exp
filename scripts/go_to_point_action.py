@@ -126,10 +126,11 @@ def done():
 
 
 def planning(goal):
+    rospy.logerr('received smth!')
 
     global state_, desired_position_
     global act_s
-    rospy.logerr('received smth!')
+
 
     desired_position_.x = goal.target_pose.pose.position.x
     desired_position_.y = goal.target_pose.pose.position.y
@@ -175,12 +176,12 @@ def planning(goal):
 def main():
     global pub, active_, act_s
     rospy.init_node('go_to_point')
-   # rospy.loginfo('ciao')
+
+    act_s = actionlib.SimpleActionServer(
+        'reaching_goal', exp_assignment2.msg.PlanningAction, planning, auto_start=False)
+    act_s.start()
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
     sub_odom = rospy.Subscriber('odom', Odometry, clbk_odom)
-    act_s = actionlib.SimpleActionServer(
-        '/reaching_goal2', exp_assignment2.msg.PlanningAction, planning, auto_start=False)
-    act_s.start()
 
     rate = rospy.Rate(20)
 

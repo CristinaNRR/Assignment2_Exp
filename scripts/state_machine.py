@@ -23,7 +23,6 @@ import imutils
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Twist
 
-VERBOSE = False
 
 
 
@@ -38,48 +37,38 @@ def user_action(data):
     elif(data=='NORMAL'):
 	return ('normal')
 
-   # else:
-   #	return random.choice(['sleep','normal'])
-  
+   
 
 
 
-# define state normal
+# in the normal state the robot reaches random positions. After a certain time move to the sleep behaviour.
+#when it sees the ball it moves to the play behaviour.
 class Normal(smach.State):
     def __init__(self):
         self.var='FALSE'
 	self.count=0
-	#self.gesture=[0,0]
-	#get params from the parameter server
-	#self.var= rospy.get_param('~person')
-	#self.person = []
-	#n = int(self.var[0])
-	#self.person.append(n)
-	#n = int(self.var[2])
-	#self.person.append(n)
-	#self.person = [2,2]
+        #wait some seconds when we launch the program
         time.sleep(6)
-       # rospy.Subscriber('gesture', Num, self.callback)
         smach.State.__init__(self, 
-                             outcomes=['play','sleep', 'normal'])
+                             outcomes=['play','sleep'])
 
 
     def execute(self,userdata):
-	
+
+        rospy.loginfo('Executing state NORMAL ')
+	#send to the actionlib client the target positions to reach
       	pub = rospy.Publisher('targetPosition', Num,queue_size=10)
-        # subscribed Topic
+        # subscribed to the camera topic
         self.subscriber = rospy.Subscriber("camera1/image_raw/compressed",
                                            CompressedImage, self.callback,  queue_size=1)
 
-        rospy.loginfo('Executing state NORMAL ')
-	self.var='FALSE'
-	#count=0
 
+	self.var='FALSE'
 	while(self.var=='FALSE'):
-        	#send the robot 3 random positions
+        	#send the robot random positions
 		randomlist = []
 		for i in range(0,2):
-			n = random.randint(1,5)
+			n = random.randint(0,7)
 			randomlist.append(n)
 	        rospy.loginfo('sending the random position: %s', randomlist)		
 		pub.publish(randomlist)
@@ -87,15 +76,19 @@ class Normal(smach.State):
 		rospy.loginfo('still in NORMAL ')
                 #to syncronize with the action client
 		if(self.count>=1):
+			#stop until the just sent target has been reached
                		rospy.wait_for_message('chatter', Int8)
 
 		self.count = self.count+1
+		#after some actions have been executed go to the sleep state
 		if self.count==4 :
 			self.count=1
 			self.var='FALSE'
 			return user_action('SLEEP')	
 
+	#when the robot sees the ball, move to the play state
 	self.var='FALSE'
+	#unsubscribe to the camera topic to avoid overlapping
 	self.subscriber.unregister()
 	return user_action('PLAY')
 
@@ -104,10 +97,6 @@ class Normal(smach.State):
 
     def callback(self,ros_data):
    
-    #	rospy.loginfo('received image ')
-	#next time we enter the normal state, the play state must be activated
-    	#self.var = 'TRUE' 
-	#self.gesture = data.num
 
  #### direct conversion to CV2 ####
         np_arr = np.fromstring(ros_data.data, np.uint8)
@@ -127,38 +116,27 @@ class Normal(smach.State):
         cnts = imutils.grab_contours(cnts)
         center = None
         # only proceed if at least one contour was found
+	#put a flag to true when the robot sees the ball
         if len(cnts) > 0:
     		self.var = 'TRUE' 
-	#else :
-		#self.var = 'FALSE'
+	
         
+   
 
-    
 
-
-#the robot goes to a predifined position and stays there for a certain time. After that it goes to the normal behavour
+#in the sleep state the robot goes to a predifined position and stays there for a certain time. After that it goes to the normal behavour
 class Sleep(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['normal'])
 
-	#get params from the parameter server
-	#self.var= rospy.get_param('~home')
-	#self.home = []
-	#n = int(self.var[0])
-	#self.home.append(n)
-	#n = int(self.var[2])
-	#self.home.append(n)
+
         self.home = [3,3]
 
     def execute(self,userdata):
         rospy.loginfo('Executing state SLEEP')
+	#send the actionlib client the target position to reach
         pub = rospy.Publisher('targetPosition', Num,queue_size=10) 
-
-
-		
-
-        #rospy.loginfo('sending the home position')
 	pub.publish(self.home)	
         rospy.wait_for_message('chatter', Int8)	
 	#add a sleep to make the robot remain in the sleep state for a certain time
@@ -169,7 +147,8 @@ class Sleep(smach.State):
             
 
 
-# define state play
+# In the play state the robot keeps tracking the ball. When the ball stops it moves the head.
+#It goes back to the normale behaviour when it canno't find the ball for a certain amount of time.
 class Play(smach.State):
     def __init__(self):
 	
@@ -183,35 +162,29 @@ class Play(smach.State):
 
 	rospy.loginfo('Executing state PLAY')
 
-        self.image_pub = rospy.Publisher("/output/image_raw/compressed",
-                                         CompressedImage, queue_size=1)
+       # self.image_pub = rospy.Publisher("/output/image_raw/compressed",
+        #                                 CompressedImage, queue_size=1)
         self.vel_pub = rospy.Publisher("cmd_vel",
                                        Twist, queue_size=1)
         self.publisher = rospy.Publisher("/robot/joint1_position_controller/command", Float64, queue_size=10)
 
-        # subscribed Topic
+       
         self.subscriber = rospy.Subscriber("camera1/image_raw/compressed",
                                            CompressedImage, self.callback2,  queue_size=1)
 
 	self.lastTime = datetime.datetime.now().time()
-	print(self.lastTime)
+
 	while(self.var2<600):
-		#rospy.loginfo('still in PLAY')
 		self.count = self.count+1
 
+	#go back to normal behaviour
 	rospy.loginfo('stoptracking')
 	self.var2=0
 	self.subscriber.unregister()
-	#time.sleep(5)
 	return user_action('NORMAL')
            
     def callback2(self, ros_data):
-   
-    	#rospy.loginfo('received image ')
-
-	#next time we enter the normal state, the play state must be activated
-    	#self.var = 'TRUE' 
-	#self.gesture = data.num
+  
 
  #### direct conversion to CV2 ####
         np_arr = np.fromstring(ros_data.data, np.uint8)
@@ -225,7 +198,6 @@ class Play(smach.State):
         mask = cv2.inRange(hsv, greenLower, greenUpper)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
-        #cv2.imshow('mask', mask)
         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
@@ -235,6 +207,8 @@ class Play(smach.State):
             # find the largest contour in the mask, then use
             # it to compute the minimum enclosing circle and
             # centroid
+
+	    #put the variable to 0 when the robot sees the ball
 	    self.var2=0
             c = max(cnts, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
@@ -252,12 +226,11 @@ class Play(smach.State):
                 vel.angular.z = -0.002*(center[0]-400)
                 vel.linear.x = -0.01*(radius-100)
                 self.vel_pub.publish(vel)
-	       # print(vel)
 	        currentTime = datetime.datetime.now().time()
-		print(currentTime)
                 delta = datetime.timedelta(seconds = 7)
-	
-		if (vel.angular.z<0.05 and vel.angular.z>-0.05 and vel.linear.x<0.05 and vel.linear.x>-0.05 and currentTime>(datetime.datetime.combine(datetime.date(1,1,1),self.lastTime)+ 			delta).time()):
+
+		#rotate the camera if the robot is not moving	  
+		if (vel.angular.z<0.03 and vel.angular.z>-0.03 and vel.linear.x<0.03 and vel.linear.x>-0.03 and currentTime>(datetime.datetime.combine(datetime.date(1,1,1),self.lastTime)+ 			delta).time()):
 
 			  angle = Float64()
   			  angle.data = 0.0
@@ -280,15 +253,12 @@ class Play(smach.State):
                 self.vel_pub.publish(vel)
 
         else:
+	    #increment a variable everytime the robot doesn't see the ball
 	    self.var2 = self.var2+1
             vel = Twist()
             vel.angular.z = 0.5
             self.vel_pub.publish(vel)
 
-        #cv2.imshow('window', image_np)
-        #cv2.waitKey(2)
-
-        # self.subscriber.unregister()
 
 
 
@@ -307,7 +277,7 @@ class func():
     with sm:
         # Add states to the container
         smach.StateMachine.add('NORMAL', Normal(), 
-                               transitions={'normal':'NORMAL', 
+                               transitions={
                                             'play':'PLAY',
 				             'sleep' : 'SLEEP'})
                                               
