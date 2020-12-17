@@ -41,9 +41,13 @@ def user_action(data):
 
 
 
-# in the normal state the robot reaches random positions. After a certain time move to the sleep behaviour.
-#when it sees the ball it moves to the play behaviour.
+
 class Normal(smach.State):
+
+''' 
+In the normal state the robot reaches random positions. After a certain time move to the sleep behaviour.
+when it sees the ball it moves to the play behavior
+'''
     def __init__(self):
         self.var='FALSE'
 	self.count=0
@@ -123,8 +127,11 @@ class Normal(smach.State):
    
 
 
-#in the sleep state the robot goes to a predifined position and stays there for a certain time. After that it goes to the normal behavour
+
 class Sleep(smach.State):
+'''
+In the sleep state the robot goes to a predifined position and stays there for a certain time. After that it goes to the normal behavior
+'''
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['normal'])
@@ -146,9 +153,11 @@ class Sleep(smach.State):
             
 
 
-# In the play state the robot keeps tracking the ball. When the ball stops it moves the head.
-#It goes back to the normale behaviour when it canno't find the ball for a certain amount of time.
 class Play(smach.State):
+'''
+In the play state the robot keeps tracking the ball. When the ball stops it moves the head.
+It goes back to the normale behaviour when it canno't find the ball for a certain amount of time
+'''
     def __init__(self):
 	
         smach.State.__init__(self, 
