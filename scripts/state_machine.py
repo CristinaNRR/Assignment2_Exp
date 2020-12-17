@@ -68,12 +68,11 @@ class Normal(smach.State):
         	#send the robot random positions
 		randomlist = []
 		for i in range(0,2):
-			n = random.randint(0,7)
+			n = random.randint(-7,7)
 			randomlist.append(n)
 	        rospy.loginfo('sending the random position: %s', randomlist)		
 		pub.publish(randomlist)
  		time.sleep(3)
-		rospy.loginfo('still in NORMAL ')
                 #to syncronize with the action client
 		if(self.count>=1):
 			#stop until the just sent target has been reached
@@ -178,7 +177,7 @@ class Play(smach.State):
 		self.count = self.count+1
 
 	#go back to normal behaviour
-	rospy.loginfo('stoptracking')
+	rospy.loginfo('stop tracking the ball')
 	self.var2=0
 	self.subscriber.unregister()
 	return user_action('NORMAL')

@@ -126,7 +126,7 @@ def done():
 
 
 def planning(goal):
-    rospy.logerr('received smth!')
+    rospy.logerr('server received the position')
 
     global state_, desired_position_
     global act_s
